@@ -1,6 +1,9 @@
 package com.example.demo.login.domain.model.repository;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -17,15 +20,30 @@ public class UserDaoJdbcImpl implements UserDao{
 	//Userテーブルの件数を取得
 	@Override
 	public int cout() throws DataAccessException {
-		// TODO 自動生成されたメソッド・スタブ
-		return 0;
+		int count = jdbc.queryForObject("SELECT COUNT(* FROM m_user)", Integer.class);
+		return count;
 	}
 
 	//Userテーブルにデータを１件追加
 	@Override
 	public int insertOne(User user) throws DataAccessException {
-		// TODO 自動生成されたメソッド・スタブ
-		return 0;
+		int rowNumber =jdbc.update("INSERT INTO m_user("
+				+ "user_id,"
+				+ " password,"
+				+ " user_name,"
+				+ " birthday,"
+				+ " age,"
+				+ " marriage,"
+				+ " role)"
+				+ " VALUES(?,?,?,?,?,?,?)"
+				,user.getUserId()
+				,user.getPassword()
+				,user.getUserName()
+				,user.getBirthday()
+				,user.getAge()
+				,user.isMarriage()
+				,user.getRole());
+		return rowNumber;
 	}
 
 	//Userテーブルのデータを１件取得
@@ -38,8 +56,25 @@ public class UserDaoJdbcImpl implements UserDao{
 	//Userテーブルの全データを取得
 	@Override
 	public List<User> selectMany() throws DataAccessException {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		List<Map<String,Object>>getList = jdbc.queryForList("SELECT * FROM m_user");
+		List<User> userList=new ArrayList<>();
+		
+		for(Map<String,Object> map:getList) {
+			User user = new User();
+			//取得したデータのセット
+			user.setUserId((String)map.get("user_id"));
+			user.setPassword((String)map.get("password"));
+			user.setUserName((String)map.get("user_name"));
+			user.setBirthday((Date)map.get("birthday"));
+			user.setAge((Integer)map.get("age"));
+			user.setMarriage((Boolean)map.get("marriage"));
+			user.setRole((String)map.get("role"));
+			
+			//結果返却用のListに追加
+			userList.add(user);
+		}
+		return userList;
+		
 	}
 
 	//Userテーブルを１件更新
